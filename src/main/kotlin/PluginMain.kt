@@ -39,7 +39,7 @@ object PluginMain : KotlinPlugin(
 ) {
     private var msgList = ArrayList<RepeatData>()
     private var msgMap = HashMap<String, RepeatData>()
-    private const val MAX_REPEAT_COUNT = 20;
+    private const val MAX_REPEAT_COUNT = 10;
     override fun onEnable() {
         logger.info { "QQBot Plugin loaded" }
 
@@ -49,20 +49,21 @@ object PluginMain : KotlinPlugin(
             try {
 
                 if (msgList.size == 0) {
-                    group.sendMessage("小浣熊悄悄起床了~")
+                    group.sendMessage("~小浣熊悄悄起床了~")
                 }
 
                 if (group.id != 1022441533L) {
                     return@subscribeAlways
                 }
 
-
-                val msgStr = message.contentToString()
+                val msgStr = message.serializeToMiraiCode()
 
                 if (msgStr.equals("全知全能的小浣熊，请帮助我避开雷区！")) {
-                    var msg = "---"
+                    var msg = ""
+                    var i = 0;
                     for (msgData in msgList) {
-                        msg += "\n" + msgData.cnt + ":" + msgData.msg
+                        i++
+                        msg += "======\n[" + i + "] " + msgData.cnt + ":" + msgData.msg + "\n"
                     }
                     group.sendMessage(msg)
                 }
@@ -125,6 +126,7 @@ object PluginMain : KotlinPlugin(
 //            //好友信息
 //        }
     }
+
 
     private fun printMsgList(group: Group) {
     }
