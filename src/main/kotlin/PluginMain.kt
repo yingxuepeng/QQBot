@@ -2,10 +2,12 @@ package org.example.mirai.plugin
 
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
+import net.mamoe.mirai.contact.Group
 import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.events.GroupMessageEvent
 import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.utils.info
+import kotlin.random.Random
 
 /**
  * 使用 kotlin 版请把
@@ -53,7 +55,18 @@ object PluginMain : KotlinPlugin(
                 if (group.id != 1022441533L) {
                     return@subscribeAlways
                 }
+
+
                 val msgStr = message.contentToString()
+
+                if (msgStr.equals("全知全能的小浣熊，请帮助我避开雷区！")) {
+                    var msg = "---"
+                    for (msgData in msgList) {
+                        msg += "\n" + msgData.cnt + ":" + msgData.msg
+                    }
+                    group.sendMessage(msg)
+                }
+
                 var repData = msgMap[msgStr];
                 var isRepeat = false;
 
@@ -85,7 +98,7 @@ object PluginMain : KotlinPlugin(
                     return@subscribeAlways
                 }
 
-                val repeatLevel = getRepeatLevel(repData.cnt)
+                val repeatLevel = getRepeatLevel(repData.cnt, time)
                 if (repeatLevel == RepeatLevel.Miss) {
                     return@subscribeAlways
                 }
@@ -113,10 +126,13 @@ object PluginMain : KotlinPlugin(
 //        }
     }
 
-    private fun getRepeatLevel(repeatCnt: Int): RepeatLevel {
+    private fun printMsgList(group: Group) {
+    }
+
+    private fun getRepeatLevel(repeatCnt: Int, time: Int): RepeatLevel {
         val delta: Double = repeatCnt * 0.0001
-        Math.
-        val rand: Double = Math.random() + delta
+        val rand: Double = Random(time).nextDouble() + delta
+
         if (rand > 0.999) {
             return RepeatLevel.SSR
         } else if (rand > 0.95) {
