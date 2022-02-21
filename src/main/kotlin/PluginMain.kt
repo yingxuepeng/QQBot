@@ -1,9 +1,13 @@
 package org.example.mirai.plugin
 
+import kotlinx.coroutines.launch
+import net.mamoe.mirai.Bot
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
 import net.mamoe.mirai.contact.Group
 import net.mamoe.mirai.event.GlobalEventChannel
+import net.mamoe.mirai.event.events.BotOfflineEvent
+import net.mamoe.mirai.event.events.BotOnlineEvent
 import net.mamoe.mirai.event.events.GroupMessageEvent
 import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.utils.info
@@ -40,19 +44,25 @@ object PluginMain : KotlinPlugin(
     private var msgList = ArrayList<RepeatData>()
     private var msgMap = HashMap<String, RepeatData>()
     private const val MAX_REPEAT_COUNT = 10;
+    private var CurBot: Bot? = null
+    private const val GROUP_ID = 1022441533L;
     override fun onEnable() {
         logger.info { "QQBot Plugin loaded" }
-
         //配置文件目录 "${dataFolder.absolutePath}/"
+
         val eventChannel = GlobalEventChannel.parentScope(this)
+        eventChannel.subscribeAlways<BotOnlineEvent> {
+            CurBot = bot
+            bot.getGroup(GROUP_ID)?.sendMessage("~小浣熊悄悄起床了~")
+        }
+
+        eventChannel.subscribeAlways<BotOfflineEvent> {
+            bot.getGroup(GROUP_ID)?.sendMessage("~小浣熊爽够了睡觉了~")
+        }
+
         eventChannel.subscribeAlways<GroupMessageEvent> {
             try {
-
-                if (msgList.size == 0) {
-                    group.sendMessage("~小浣熊悄悄起床了~")
-                }
-
-                if (group.id != 1022441533L) {
+                if (group.id != GROUP_ID) {
                     return@subscribeAlways
                 }
 
@@ -126,7 +136,6 @@ object PluginMain : KotlinPlugin(
 //            //好友信息
 //        }
     }
-
 
     private fun printMsgList(group: Group) {
     }
