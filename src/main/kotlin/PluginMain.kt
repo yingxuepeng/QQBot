@@ -1,6 +1,5 @@
 package org.example.mirai.plugin
 
-import kotlinx.coroutines.launch
 import net.mamoe.mirai.Bot
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
@@ -46,6 +45,7 @@ object PluginMain : KotlinPlugin(
     private const val MAX_REPEAT_COUNT = 10;
     private var CurBot: Bot? = null
     private const val GROUP_ID = 1022441533L;
+    private var lastHintTime: Long = 0;
     override fun onEnable() {
         logger.info { "QQBot Plugin loaded" }
         //配置文件目录 "${dataFolder.absolutePath}/"
@@ -53,7 +53,7 @@ object PluginMain : KotlinPlugin(
         val eventChannel = GlobalEventChannel.parentScope(this)
         eventChannel.subscribeAlways<BotOnlineEvent> {
             CurBot = bot
-            bot.getGroup(GROUP_ID)?.sendMessage("~小浣熊悄悄起床了~")
+            bot.getGroup(GROUP_ID)?.sendMessage("~心狠手辣的小浣熊悄悄起床了~")
         }
 
         eventChannel.subscribeAlways<BotOfflineEvent> {
@@ -68,7 +68,7 @@ object PluginMain : KotlinPlugin(
 
                 val msgStr = message.serializeToMiraiCode()
 
-                if (msgStr.equals("全知全能的小浣熊，请帮助我避开雷区！")) {
+                if (msgStr.equals("全知全能的小浣熊，请帮助我避开雷区！") && System.currentTimeMillis() - lastHintTime > 60 * 1000) {
                     var msg = ""
                     var i = 0;
                     for (msgData in msgList) {
@@ -76,6 +76,7 @@ object PluginMain : KotlinPlugin(
                         msg += "======\n[" + i + "] " + msgData.cnt + ":" + msgData.msg + "\n"
                     }
                     group.sendMessage(msg)
+                    lastHintTime = System.currentTimeMillis()
                 }
 
                 var repData = msgMap[msgStr];
@@ -121,11 +122,14 @@ object PluginMain : KotlinPlugin(
                 if (nick == null || nick.equals("")) {
                     nick = sender.nick
                 }
-                group.sendMessage(Image("{1FC3D44A-6F98-6E13-2025-756013B51688}.jpg"))
-                group.sendMessage("恭喜\"" + nick + "\"的第" + repData.cnt + "次复读抽中了" + label + "复读卡，喜提" + muteTime + "秒禁言~")
+                if (repeatLevel != RepeatLevel.Normal) {
+                    group.sendMessage(Image("{1FC3D44A-6F98-6E13-2025-756013B51688}.jpg"))
+                    group.sendMessage("恭喜\"" + nick + "\"的第" + repData.cnt + "次复读抽中了" + label + "复读卡，喜提" + muteTime + "秒禁言~")
+                }
+
                 sender.mute(muteTime)
             } catch (e: Exception) {
-                group.sendMessage("卡bug啦~" + e.toString())
+                group.sendMessage("卡bug啦~\n" + e.toString())
                 return@subscribeAlways
             }
 
@@ -158,11 +162,11 @@ object PluginMain : KotlinPlugin(
 
     private fun getRepeatMuteTime(level: RepeatLevel): Int {
         if (level == RepeatLevel.SSR) {
-            return 720
+            return 1800
         } else if (level == RepeatLevel.SR) {
-            return 360
+            return 600
         } else if (level == RepeatLevel.R) {
-            return 180
+            return 300
         } else if (level == RepeatLevel.Normal) {
             return 60
         }
